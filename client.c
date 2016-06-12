@@ -13,7 +13,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 99999
 
 void communicate(int, FILE*);
 void command(int, char*);
@@ -72,16 +72,19 @@ void communicate(int socket_dialog, FILE* file) {
 		
 		command(socket_dialog, emission);
 		
-		nb_char = read(socket_dialog, reception, BUFFER_SIZE);
-		
-		fputs(reception, stdout);
-		
 		printf("\n> ");
+		
+		if ((nb_char = read(socket_dialog, reception, BUFFER_SIZE)) > 0) {		
+			fputs(reception, stdout);
+		}
+
 	}
 }
 
 void command(int socket_dialog, char* input) {
 
+	char emission[BUFFER_SIZE];
+	
 	if (strcmp(input, "ls\n") == 0) {
 		execlp("/bin/ls", "ls", NULL);
 	}
@@ -89,7 +92,7 @@ void command(int socket_dialog, char* input) {
 		execlp("/bin/pwd", "pwd", NULL);
 	}
 	else if (strcmp(input, "cd\n") == 0) {
-		char path[200];
+		char path[1035];
 		
 		printf("Path:\n");
 		scanf("%s", &path);
@@ -98,8 +101,19 @@ void command(int socket_dialog, char* input) {
 		
 		execlp("/bin/ls", "ls", NULL);
 	}
+	else if (strcmp(input, "rcd\n") == 0) {
+		char path[1035];
+		
+		printf("Path:\n");
+		scanf("%s", &path);
+		
+		strcpy(emission, "rcd ");
+		strcat(emission, path);
+		
+		write(socket_dialog, emission, strlen(emission) + 1);
+	}
 	else if (strcmp(input, "rm\n") == 0) {
-		char path[200];
+		char path[1035];
 		
 		printf("Path:\n");
 		scanf("%s", &path);
@@ -107,6 +121,36 @@ void command(int socket_dialog, char* input) {
 		unlink(path);
 		
 		execlp("/bin/ls", "ls", NULL);
+	}
+	else if (strcmp(input, "upld\n") == 0) {
+		char path[1035];
+		char content[BUFFER_SIZE];
+		FILE* file;
+		
+		printf("File:\n");
+		scanf("%s", &path);
+		
+		strcpy(emission, "upld ");
+		strcat(emission, path);
+		strcat(emission, "\n");
+		
+		file = fopen(path, "r");
+		while (fgets(content, BUFFER_SIZE, file) != NULL) {
+			strcat(emission, content);
+		}
+		
+		write(socket_dialog, emission, strlen(emission) + 1);
+	}
+	else if (strcmp(input, "downl\n") == 0) {
+		char path[1035];
+		
+		printf("File:\n");
+		scanf("%s", &path);
+		
+		strcpy(emission, "downl ");
+		strcat(emission, path);
+		
+		write(socket_dialog, emission, strlen(emission) + 1);
 	}
 	else {
 		write(socket_dialog, input, strlen(input) + 1);
