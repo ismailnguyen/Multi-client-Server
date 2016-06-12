@@ -10,6 +10,8 @@ make
 
 ## Usage
 
+### Server
+
 Launch server first
 
 ```
@@ -24,6 +26,8 @@ Or, specify it on command line:
 ./server 3434
 ```
 
+### Client
+
 Then, launch many of clients you want
 
 ```
@@ -37,3 +41,20 @@ Or, specify them on command line:
 ```
 ./client 127.0.0.1 3434
 ```
+
+#### Commands
+
+Through client, you will be able to run some commands:
+
+Local:
+- ls (Return list of files and sub-directories on current directory)
+- pwd (Return current directory)
+- cd (Change directory to given path)
+- rm (Remove file from given path)
+
+Distant:
+- rls (Show remote directory contents)
+- rcd (Change remote directory path)
+- rpwd (Return remote directory path)
+- upld (Upload file)
+- downl (Download file)
