@@ -10,15 +10,17 @@
 #define BUFFER_SIZE 1024
 #define MAX_CONNECTION 10
 
+void communicate(int socket_dialog);
+
 int main (int argc, char** argv) {
 
 	int sock_ecoute, sock_dialogue;
 	struct sockaddr_in client, server;
-	socklen_t len;
+	socklen_t client_len;
 	int res, port;
 	char reception[BUFFER_SIZE], emission[BUFFER_SIZE];
 
-	if((argv[1] != NULL))
+	if ((argv[1] != NULL))
 	{
 		port = atoi(argv[1]);
 	}
@@ -42,15 +44,13 @@ int main (int argc, char** argv) {
 
 	listen(sock_ecoute, MAX_CONNECTION);
 
-	// Boucle d'acceptation des clients
-	int nb_char = 0, client_number = 0;
-	int clients_count = 0;
-	for(;;) {
+	ssize_t nb_char;
+	int clients_count = 0, client_number = 0;
+	for (;;) {
 
-		len = sizeof(client);
+		client_len = sizeof(client);
 
-		sock_dialogue = accept(sock_ecoute, (struct sockaddr*) &client, &len);
-		// Boucle de dialogue avec le client - fin lors de la réception de "dodo" ou d'une déconnection
+		sock_dialogue = accept(sock_ecoute, (struct sockaddr*) &client, &client_len);
 
 		client_number++;
 
@@ -62,15 +62,10 @@ int main (int argc, char** argv) {
 		}
 		else { // Child
 			close (sock_ecoute);
+			
+			communicate(sock_dialogue);
 
-			do{ 
-				nb_char = read(sock_dialogue, reception, sizeof(reception));
-				printf("Client #%d says: %s\n", client_number, reception);
-			}
-			while ( (strcmp(reception,"STOP")!= 0) && (strcmp(reception,"stop") != 0) && (nb_char > 0));
-
-			printf("Client has quit\n");
-			printf("Close dialog socket.\n");
+			printf("Client has been deconnected\n");
 			
 			close(sock_dialogue);
 			return 0;
@@ -82,4 +77,17 @@ int main (int argc, char** argv) {
 
 	close(sock_ecoute);
 	return 0;
+}
+
+void communicate(int socket_dialog) {
+
+	char reception[BUFFER_SIZE], emission[BUFFER_SIZE];
+	ssize_t nb_char;
+	
+	while ((nb_char = read(socket_dialog, reception, BUFFER_SIZE) > 0) && (strcmp(reception, "STOP\n") != 0)) {		
+		printf("%s\n", reception);
+		
+		strcpy(emission, "Server acknowledge\n");
+		write(socket_dialog, emission, strlen(emission) + 1);
+	}
 }
