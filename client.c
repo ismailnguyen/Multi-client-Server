@@ -15,6 +15,7 @@
 
 #define BUFFER_SIZE 99999
 
+//void identification(int, FILE*);
 void communicate(int, FILE*);
 void command(int, char*);
 
@@ -46,8 +47,11 @@ int main (int argc, char *argv[]) {
 	}
 	
 	printf("Connection established\n");
+    //identification(socket_client, stdin);
+    
 	printf("\> ");
 	
+    //write(socket_client, "connection", strlen("connection") + 1);
 	communicate(socket_client, stdin);
 	
 	printf("Closing socket : ");
@@ -72,14 +76,35 @@ void communicate(int socket_dialog, FILE* file) {
 		
 		command(socket_dialog, emission);
 		
+        
 		printf("\n> ");
 		
-		if ((nb_char = read(socket_dialog, reception, BUFFER_SIZE)) > 0) {		
+		if ((nb_char = read(socket_dialog, reception, BUFFER_SIZE)) > 0) {
 			fputs(reception, stdout);
 		}
 
 	}
 }
+
+/*void identification(int socket_dialog, FILE* file) {
+    printf("\n identification \n");
+    char reception[BUFFER_SIZE], emission[BUFFER_SIZE];
+    int nb_char;
+    
+    
+    while ((nb_char = read(socket_dialog, reception, BUFFER_SIZE)) > 0 && (strcmp(reception, "good") != 0)) {
+        printf(reception);
+        printf(" /username : ");
+        if ((fgets(emission, BUFFER_SIZE, file) != NULL) && (strcmp(emission, "STOP\n") != 0)) {
+            write(socket_dialog, emission, strlen(emission));
+            printf("password : ");
+        
+        }
+        if ((fgets(emission, BUFFER_SIZE, file) != NULL) && (strcmp(emission, "STOP\n") != 0)) {
+            write(socket_dialog, emission, strlen(emission));
+        }
+    }
+}*/
 
 void command(int socket_dialog, char* input) {
 
