@@ -203,10 +203,30 @@ void command(int socket_dialog, char* input) {
         }
         else if (strstr(input, "upld") != NULL) {
             char path[1035];
+            char content[1035];
             substring(input, path, 6, strlen(input) - 5);
-		
+            //strcat(path , "copy");
+            
+            write(socket_dialog, "ok", strlen("ok") + 1);
+            
             printf("-- Upload file: ");
             printf("%s\n", path);
+            
+            read(socket_dialog, emission, BUFFER_SIZE);
+            printf("-- content file: ");
+            printf("%s\n", emission);
+            //strcpy(path , trim(path));
+            //strcat(path,".txt");
+            printf("%s\n", path);
+            
+            FILE *f;
+            f = fopen(path, "wb");
+            if (f != NULL) {
+                fprintf(f, "%s",  emission);
+            } else {
+                 printf("error file upload n");
+            }
+            pclose(f);
 		
             command(socket_dialog, "Uploaded");
         }
@@ -218,7 +238,7 @@ void command(int socket_dialog, char* input) {
 
             printf("-- Download file: ");
             printf("%s\n", path);
-		
+            strcpy(emission,"");
             file = fopen(path, "r");
             if (file != NULL) {
                 while (fgets(content, BUFFER_SIZE, file) != NULL) {
@@ -228,7 +248,8 @@ void command(int socket_dialog, char* input) {
             else {
                 strcpy(emission, "UNKWN");
             }
-		
+            printf("-- content file: ");
+            printf("%s\n", emission);
             write(socket_dialog, emission, strlen(emission) + 1);
 
             pclose(file);

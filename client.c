@@ -154,11 +154,15 @@ void command(int socket_dialog, char* input) {
 		
 		printf("File:\n");
 		scanf("%s", &path);
-		
+        
+        //title
 		strcpy(emission, "upld ");
 		strcat(emission, path);
 		strcat(emission, "\n");
-		
+		write(socket_dialog, emission, strlen(path) + 1);
+        read(socket_dialog, emission, BUFFER_SIZE);
+        //content
+        strcpy(emission, "");
 		file = fopen(path, "r");
 		while (fgets(content, BUFFER_SIZE, file) != NULL) {
 			strcat(emission, content);
@@ -168,14 +172,30 @@ void command(int socket_dialog, char* input) {
 	}
 	else if (strcmp(input, "downl\n") == 0) {
 		char path[1035];
-		
+		char content[1035];
 		printf("File:\n");
 		scanf("%s", &path);
 		
 		strcpy(emission, "downl ");
 		strcat(emission, path);
-		
+		//demande
 		write(socket_dialog, emission, strlen(emission) + 1);
+        
+        strcpy(emission,"");
+        //reception
+        read(socket_dialog, emission, BUFFER_SIZE);
+        printf("-- content file: ");
+        printf("%s\n", emission);
+        FILE *f;
+        f = fopen(path, "w+");
+        if (f != NULL) {
+            fprintf(f, "%s",  emission);
+        } else {
+            printf("error file download \n");
+        }
+        printf("download succed");
+        pclose(f);
+        write(socket_dialog, "ok", strlen("ok") + 1);
 	}
 	else {
 		write(socket_dialog, input, strlen(input) + 1);
